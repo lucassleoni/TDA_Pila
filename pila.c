@@ -9,15 +9,43 @@
 #define REDIMENSION 2
 #define TAMANIO_INICIAL 10
 
+/* 
+ * Crea una pila, reservando la memoria necesearia para almacenar la
+ * estructura.
+ * Devuelve un puntero a la estructura pila_t creada o NULL si no pudo
+ * crearla.
+ */
+pila_t* pila_crear(){
+	pila_t* pila = malloc(sizeof(pila_t));
+	if(pila == NULL){
+		return NULL;
+	}
+
+	pila->elementos = malloc(sizeof(void*) * TAMANIO_INICIAL);
+	if((pila->elementos) == NULL){
+		free(pila);
+		return NULL;
+	}
+
+	pila->tope = PILA_VACIA;
+	pila->tamanio = TAMANIO_INICIAL;
+
+	return pila;
+}
+
 // Pre C.: Se debe recibir un puntero al struct pila_t pila.
 // Post C.: Devuelve 'true' si hay algún error que invalide la pila (es decir si no existe la pila, si el tope es negativo o si 'tope > tamaño').
 bool hay_error(pila_t* pila){
-	return ((!pila) || (!(pila->elementos)) || ((pila->tope) < PILA_VACIA) || ((pila->tope) > (pila->tamanio)));
+	return ((pila == NULL) || ((pila->elementos) == NULL) || ((pila->tope) < PILA_VACIA) || ((pila->tope) > (pila->tamanio)));
 }
 
 // Pre C.: Se debe recibir un puntero al struct pila_t pila.
 // Post C.: Devuelve 'true' si la pila está llena (si tiene tantos elementos como espacios en ella).
+//			Si la pila no existe devolverá 'false'.
 bool pila_llena(pila_t* pila){
+	if(pila == NULL){
+		return false;
+	}
 	return ((pila->tope) == (pila->tamanio));
 }
 
@@ -27,33 +55,10 @@ bool pila_llena(pila_t* pila){
  * Si la pila no existe devolverá true.
  */
 bool pila_vacia(pila_t* pila){
-	if(!pila){
+	if(pila == NULL){
 		return true;
 	}
 	return ((pila->tope) == PILA_VACIA);
-}
-
-/* 
- * Crea una pila, reservando la memoria necesearia para almacenar la
- * estructura.
- * Devuelve un puntero a la estructura pila_t creada o NULL si no pudo
- * crearla.
- */
-pila_t* pila_crear(){
-	pila_t* pila = malloc(sizeof(pila_t));
-	if(!pila){
-		return NULL;
-	}
-
-	pila->elementos = malloc(sizeof(void*) * TAMANIO_INICIAL);
-	if(!(pila->elementos)){
-		free(pila);
-		return NULL;
-	}
-
-	pila->tope = PILA_VACIA;
-	pila->tamanio = TAMANIO_INICIAL;
-	return pila;
 }
 
 // Pre C.: Debe recibir la pila y el tamaño numérico (o proporción) al que se quiere redimensionar el vector de elementos.
@@ -64,7 +69,7 @@ int pila_redimensionar(pila_t* pila, int nuevo_tamanio){
 	}
 	
 	void* elementos_aux = realloc(pila->elementos, sizeof(void*) * (long unsigned int) nuevo_tamanio);
-	if(!elementos_aux){
+	if(elementos_aux == NULL){
 		return FALLO;
 	}
 	pila->elementos = elementos_aux;
@@ -105,10 +110,9 @@ int pila_desapilar(pila_t* pila){
 		return FALLO;
 	}
 
-
 	(pila->tope)--;
 
-	if((pila->tope) <= ((pila->tamanio) / 2)){
+	if(((pila->tope) <= ((pila->tamanio) / 2)) && ((pila->tamanio) >= (TAMANIO_INICIAL * 2))){
 		if(pila_redimensionar(pila, (pila->tamanio) / REDIMENSION) == FALLO){
 			return FALLO;
 		}
